@@ -1,3 +1,4 @@
+from lxml import etree
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -20,20 +21,35 @@ browser.get(url)  # 打开url
 '''presence_of_element_located存在并定位元素'''
 # 栏目列表
 # try:
-navList = browser.find_elements_by_xpath('/html/body/div[4]/div[2]/a')
+navList = wait.until(EC.presence_of_all_elements_located((By.XPATH, '/html/body/div[4]/div[2]/a')))
+print(navList)
 for i in range(1, navList.__len__()):
+
     navList[i].click()
-    # 等待加载完成
-    # 资讯列表
-    newsList = browser.find_elements_by_xpath('/html/body/div[5]/div[1]/ul/li/h2/a')
+    # 资讯列表,显式等待加载完成
+    newsList = wait.until(EC.presence_of_all_elements_located((By.XPATH, '/html/body/div[5]/div[1]/ul/li/h2/a')))
     for item in newsList:
         time.sleep(3)
+
         item.click()
+
+        time.sleep(3)
+
+        html = etree.HTML(browser.page_source)
+        doc = pq(html)
+
         news = {
-            'title': browser.find_element_by_xpath("//DT[@class='clearfix']").text,
-            'time': browser.find_element_by_xpath("//DL[@class='atitle']/DD[1]").text
+            'title': html.xpath("/html/body/div[5]/div[1]/div[1]/dl/dt//text()"),
+            'time': html.xpath("/html/body/div[5]/div[1]/div[1]/dl/dd//text()"),
+            'content': html.xpath("/html/body/div[5]/div[1]/div[1]/div")
+            # 下面这两行解析不到
+            # 'title': browser.find_element_by_xpath("//DT[@class='clearfix']").text,
+            # 'time': browser.find_element_by_xpath("//DL[@class='atitle']/DD[1]").text
         }
-        print(news['time'])
+        news1 = {
+
+        }
+        print(news)
         pass
 
 browser.close()
